@@ -42,11 +42,9 @@ namespace VCAuthn.IdentityServer
                     // this enables automatic token cleanup. this is optional.
                     options.EnableTokenCleanup = true;
                 })
-
                 
                 // If cert supplied will parse and call AddSigningCredential(), if not found will create a temp one
-                .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value)
-                ;
+                .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value);
         }
         
         public static void UseAuthServer(this IApplicationBuilder app, IConfiguration config)
@@ -69,16 +67,25 @@ namespace VCAuthn.IdentityServer
                 var currentIdentityResources = configContext.IdentityResources.ToList();
                 foreach (var resource in Config.GetIdentityResources())
                 {
-                    if (!currentIdentityResources.Any(_ => resource.Name == _.Name))
+                    if (currentIdentityResources.All(_ => resource.Name != _.Name))
                     {
                         configContext.IdentityResources.Add(resource.ToEntity());
                     }
                 }
                 configContext.SaveChanges();
                 
+                //Seed pre-configured clients
+                var currentClients = configContext.Clients.ToList();
                 foreach (var client in Config.GetClients())
                 {
-                    configContext.Clients.Add(client.ToEntity());
+                    if (currentClients.Any(_ => _.ClientId == client.ClientId))
+                    {
+                        configContext.Clients.Update(client.ToEntity());
+                    }
+                    else
+                    {
+                        configContext.Clients.Add(client.ToEntity());
+                    }
                 }
                 configContext.SaveChanges();
             }
