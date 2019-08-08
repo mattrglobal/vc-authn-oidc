@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VCAuthn.IdentityServer.Endpoints;
+using VCAuthn.Utils;
 
 namespace VCAuthn.IdentityServer
 {
@@ -44,7 +46,11 @@ namespace VCAuthn.IdentityServer
                 })
                 
                 // If cert supplied will parse and call AddSigningCredential(), if not found will create a temp one
-                .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value);
+                .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value)
+                
+                // Custom Endpoints
+                .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, AuthorizeEndpoint.Path.EnsureLeadingSlash())
+                ;
         }
         
         public static void UseAuthServer(this IApplicationBuilder app, IConfiguration config)
@@ -53,15 +59,15 @@ namespace VCAuthn.IdentityServer
             app.UseIdentityServer();
         }
         
-         public static void InitializeDatabase(IApplicationBuilder app, string rootClientSecret)
+        public static void InitializeDatabase(IApplicationBuilder app, string rootClientSecret)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                //Resolve the required services
+                // Resolve the required services
                 var configContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
 
-                //Migrate any required db contexts
+                // Migrate any required db contexts
                 configContext.Database.Migrate();
                 
                 var currentIdentityResources = configContext.IdentityResources.ToList();
@@ -74,7 +80,7 @@ namespace VCAuthn.IdentityServer
                 }
                 configContext.SaveChanges();
                 
-                //Seed pre-configured clients
+                // Seed pre-configured clients
                 var currentClients = configContext.Clients.ToList();
                 foreach (var client in Config.GetClients())
                 {
