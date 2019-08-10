@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using VCAuthn.IdentityServer.Endpoints;
+using VCAuthn.Services;
 using VCAuthn.Utils;
 
 namespace VCAuthn.IdentityServer
@@ -51,6 +53,8 @@ namespace VCAuthn.IdentityServer
                 // Custom Endpoints
                 .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, AuthorizeEndpoint.Path.EnsureLeadingSlash())
                 ;
+            
+            services.AddSingleton<IPresentationConfigurationService, PresentationConfigurationService>();
         }
         
         public static void UseAuthServer(this IApplicationBuilder app, IConfiguration config)
@@ -61,6 +65,8 @@ namespace VCAuthn.IdentityServer
         
         public static void InitializeDatabase(IApplicationBuilder app, string rootClientSecret)
         {
+            var _logger = app.ApplicationServices.GetService<ILogger<Startup>>();
+            
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 // Resolve the required services
@@ -82,15 +88,18 @@ namespace VCAuthn.IdentityServer
                 
                 // Seed pre-configured clients
                 var currentClients = configContext.Clients.ToList();
+
+                foreach (var client in currentClients)
+                {
+                    _logger.LogDebug($"Existing client: [{client.ClientId} ; {client.Id}]");
+                }
+                
                 foreach (var client in Config.GetClients())
                 {
-                    if (currentClients.Any(_ => _.ClientId == client.ClientId))
+                    if (currentClients.All(_ => _.ClientId != client.ClientId))
                     {
-                        configContext.Clients.Update(client.ToEntity());
-                    }
-                    else
-                    {
-                        configContext.Clients.Add(client.ToEntity());
+                        _logger.LogDebug($"Inserting client [{client.ClientId}]");
+                        configContext.Clients.Add(client.ToEntity());    configContext.SaveChanges();
                     }
                 }
                 configContext.SaveChanges();
