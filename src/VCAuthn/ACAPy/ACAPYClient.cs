@@ -26,8 +26,7 @@ namespace VCAuthn.ACAPy
         {
             _httpClient = new HttpClient();
             _logger = logger;
-            var acapyConfig = config.GetSection("ACAPY");
-            _baseUrl = acapyConfig.GetValue<string>("BaseUrl");
+            _baseUrl = config.GetValue<string>("BaseUrl");
         }
         
         public async Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationConfiguration presentationConfiguration)

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using VCAuthn.ACAPy;
 using VCAuthn.IdentityServer;
 
 namespace VCAuthn
@@ -21,7 +23,8 @@ namespace VCAuthn
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddSingleton<IACAPYClient, ACAPYClient>();
+            // register ACAPY Client
+            services.AddSingleton<IACAPYClient, ACAPYClient>(s => new ACAPYClient(Configuration.GetSection("ACAPY"), s.GetService<ILogger<ACAPYClient>>()));;
             
             services.AddAuthServer(Configuration.GetSection("IdentityServer"));
         }
