@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VCAuthn.IdentityServer.Endpoints;
 using VCAuthn.PresentationConfiguration;
+using VCAuthn.UrlShortener;
 using VCAuthn.Utils;
 
 namespace VCAuthn.IdentityServer
@@ -103,6 +104,28 @@ namespace VCAuthn.IdentityServer
                     }
                 }
                 configContext.SaveChanges();
+            }
+        }
+        
+        public static void AddUrlShortenerService(this IServiceCollection services, IConfiguration config)
+        {
+            // Fetch the migration assembly
+            var migrationsAssembly = typeof(StartupExtensions).GetTypeInfo().Assembly.GetName().Name;
+
+            // Register the DB context
+            services.AddDbContext<UrlShortenerServiceDbContext>(options =>
+                options.UseNpgsql(config.GetConnectionString("Database"), x => x.MigrationsAssembly(migrationsAssembly)));
+
+            // Adds the url shortner service
+            services.AddTransient<IUrlShortenerService, UrlShortenerService>(s => new UrlShortenerService(s.GetService<UrlShortenerServiceDbContext>(), config.GetValue<string>("BaseUrl")));
+        }
+        
+        public static void UseUrlShortenerService(this IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<UrlShortenerServiceDbContext>();
+                context.Database.Migrate();
             }
         }
     }

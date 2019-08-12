@@ -27,6 +27,8 @@ namespace VCAuthn
             services.AddSingleton<IACAPYClient, ACAPYClient>(s => new ACAPYClient(Configuration.GetSection("ACAPY"), s.GetService<ILogger<ACAPYClient>>()));;
             
             services.AddAuthServer(Configuration.GetSection("IdentityServer"));
+            
+            services.AddUrlShortenerService(Configuration.GetSection("UrlShortenerService"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +45,8 @@ namespace VCAuthn
             
             // Use the auth server
             app.UseAuthServer(Configuration.GetSection("IdentityServer"));
+
+            app.UseUrlShortenerService();
         }
     }
 }
