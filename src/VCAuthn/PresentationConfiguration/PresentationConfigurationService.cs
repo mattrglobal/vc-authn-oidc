@@ -1,8 +1,7 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using VCAuthn.Models;
 
-namespace VCAuthn.Services
+namespace VCAuthn.PresentationConfiguration
 {
     public interface IPresentationConfigurationService
     {

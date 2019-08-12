@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using VCAuthn.Models;
 
-namespace VCAuthn.Services
+namespace VCAuthn.ACAPy
 {
     public interface IACAPYClient
     {
-        Task<bool> CreatePresentationExchange(PresentationConfiguration presentationConfiguration);
+        Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationConfiguration presentationConfiguration);
         Task<WalletDidPublicResponse> WalletDidPublic();
     }
 
@@ -31,7 +30,7 @@ namespace VCAuthn.Services
             _baseUrl = acapyConfig.GetValue<string>("BaseUrl");
         }
         
-        public async Task<bool> CreatePresentationExchange(PresentationConfiguration presentationConfiguration)
+        public async Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationConfiguration presentationConfiguration)
         {
             var request = new HttpRequestMessage
             {

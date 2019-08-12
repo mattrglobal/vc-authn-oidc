@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VCAuthn.IdentityServer.Endpoints;
-using VCAuthn.Services;
+using VCAuthn.PresentationConfiguration;
 using VCAuthn.Utils;
 
 namespace VCAuthn.IdentityServer

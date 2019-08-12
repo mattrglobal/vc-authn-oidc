@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace VCAuthn.Models
+namespace VCAuthn.ACAPy
 {
     public class CreatePresentationResponse
     {

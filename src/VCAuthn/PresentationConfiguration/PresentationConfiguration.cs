@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace VCAuthn.Models
+namespace VCAuthn.PresentationConfiguration
 {
     public class PresentationConfiguration
     {

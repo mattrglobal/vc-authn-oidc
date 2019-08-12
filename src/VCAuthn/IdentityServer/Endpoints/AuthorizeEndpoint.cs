@@ -8,7 +8,8 @@ using IdentityServer4.Hosting;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using VCAuthn.Services;
+using VCAuthn.ACAPy;
+using VCAuthn.PresentationConfiguration;
 
 namespace VCAuthn.IdentityServer.Endpoints
 {
