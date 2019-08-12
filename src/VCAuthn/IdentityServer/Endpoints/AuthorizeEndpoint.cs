@@ -19,16 +19,19 @@ namespace VCAuthn.IdentityServer.Endpoints
         
         private readonly IClientSecretValidator _clientValidator;
         private readonly IPresentationConfigurationService _presentationConfigurationService;
+        private readonly IACAPYClient _acapyClient;
         private readonly ILogger _logger;
 
         public AuthorizeEndpoint(
             IClientSecretValidator clientValidator,
             IPresentationConfigurationService presentationConfigurationService,
+            IACAPYClient acapyClient,
             ILogger<AuthorizeEndpoint> logger
             )
         {
             _clientValidator = clientValidator;
             _presentationConfigurationService = presentationConfigurationService;
+            _acapyClient = acapyClient;
             _logger = logger;
         }
         
@@ -87,7 +90,8 @@ namespace VCAuthn.IdentityServer.Endpoints
                 responseMode = IdentityConstants.DefaultResponseMode;
             }
 
-//            var challenge = await _presentationConfigurationService.Find(presentationConfigId);
+            var challenge = await _presentationConfigurationService.Find(presentationConfigId);
+            await _acapyClient.CreatePresentationExchange(challenge);
 //            - calls ACA-Py asking to create VC presentation Request
 //            - calculates `base64(<..>)` from the response.
 //                Example of the message that would be encoded (Example Presentation Request From OP): https://github.com/mattrglobal/vc-authn-oidc/tree/master/docs#data-model

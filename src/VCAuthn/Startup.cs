@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VCAuthn.IdentityServer;
+using VCAuthn.Services;
 
 namespace VCAuthn
 {
@@ -26,6 +27,8 @@ namespace VCAuthn
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSingleton<IACAPYClient, ACAPYClient>();
             
             services.AddAuthServer(Configuration.GetSection("IdentityServer"));
         }
