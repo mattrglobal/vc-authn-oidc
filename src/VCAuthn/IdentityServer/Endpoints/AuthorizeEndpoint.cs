@@ -1,15 +1,23 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
+using System.Security;
 using System.Threading.Tasks;
+using AutoMapper.Configuration;
 using IdentityModel;
+using IdentityServer4.Configuration;
 using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Hosting;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using VCAuthn.ACAPy;
 using VCAuthn.PresentationConfiguration;
+using VCAuthn.UrlShortener;
+using VCAuthn.Utils;
 
 namespace VCAuthn.IdentityServer.Endpoints
 {
@@ -21,18 +29,24 @@ namespace VCAuthn.IdentityServer.Endpoints
         private readonly IClientSecretValidator _clientValidator;
         private readonly IPresentationConfigurationService _presentationConfigurationService;
         private readonly IACAPYClient _acapyClient;
+        private readonly IUrlShortenerService _urlShortenerService;
+        private readonly IdentityServerOptions _options;
         private readonly ILogger _logger;
 
         public AuthorizeEndpoint(
             IClientSecretValidator clientValidator,
             IPresentationConfigurationService presentationConfigurationService,
             IACAPYClient acapyClient,
+            IUrlShortenerService urlShortenerService,
+            IOptions<IdentityServerOptions> options,
             ILogger<AuthorizeEndpoint> logger
             )
         {
             _clientValidator = clientValidator;
             _presentationConfigurationService = presentationConfigurationService;
             _acapyClient = acapyClient;
+            _urlShortenerService = urlShortenerService;
+            _options = options.Value;
             _logger = logger;
         }
         
@@ -62,8 +76,8 @@ namespace VCAuthn.IdentityServer.Endpoints
                 return Error(IdentityConstants.MissingVCAuthnScopeError, IdentityConstants.MissingVCAuthnScopeDesc);
             }
             
-            var presentationConfigId = values.Get(IdentityConstants.PresentationRequestConfigIDParamName);
-            if (string.IsNullOrEmpty(presentationConfigId))
+            var presentationRecordId = values.Get(IdentityConstants.PresentationRequestConfigIDParamName);
+            if (string.IsNullOrEmpty(presentationRecordId))
             {
                 return Error(IdentityConstants.InvalidPresentationRequestConfigIDError, IdentityConstants.InvalidPresentationRequestConfigIDDesc);
             }
@@ -91,14 +105,14 @@ namespace VCAuthn.IdentityServer.Endpoints
                 responseMode = IdentityConstants.DefaultResponseMode;
             }
 
-            var challenge = await _presentationConfigurationService.Find(presentationConfigId);
-            await _acapyClient.CreatePresentationExchange(challenge);
-//            - calls ACA-Py asking to create VC presentation Request
-//            - calculates `base64(<..>)` from the response.
-//                Example of the message that would be encoded (Example Presentation Request From OP): https://github.com/mattrglobal/vc-authn-oidc/tree/master/docs#data-model
-//            - builds a didcomm url with the base64 param: didcomms://?m=<..>&r_uri= (url format?)
-//            - shortens url
-//            - creates a QR code from the url
+            var presentationRecord = await _presentationConfigurationService.Find(presentationRecordId);
+
+            var presentationRequest = BuildPresentationRequest(presentationRecord);
+            
+            var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin , presentationRequest.ToJson().ToBase64(), redirectUrl);
+            
+            var shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
+            
 //            - creates a new session-id (uuid), persists `(session-id, presentation-request-id, expired-timestamp)` in psql.
 //                `presentation-request-id` comes from `@id` field of the presentation request
 
@@ -107,6 +121,24 @@ namespace VCAuthn.IdentityServer.Endpoints
 //                - page long polls
 
             return new AuthorizationEndpointResult(new AuthorizationRequest("CHALLENGE AWAITED"));
+        }
+
+        private string BuildUrl(string baseUrl, PresentationRequest presentationRequest)
+        {
+            
+        }
+
+        private PresentationRequest BuildPresentationRequest(PresentationRecord record)
+        {
+            record.Configuration.Nonce = $"0{Guid.NewGuid().ToString("N")}";
+
+            var request = new PresentationRequest
+            {
+                Id = Guid.NewGuid().ToString(),
+                Request = record.Configuration,
+                ThreadId = Guid.NewGuid().ToString(),
+            };
+            return request;
         }
         
         private AuthorizationFlowErrorResult Error(string error, string errorDescription = null)

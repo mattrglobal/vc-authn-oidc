@@ -12,7 +12,7 @@ namespace VCAuthn.ACAPy
 {
     public interface IACAPYClient
     {
-        Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationConfiguration presentationConfiguration);
+        Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationRecord presentationRecord);
         Task<WalletDidPublicResponse> WalletDidPublic();
     }
 
@@ -29,13 +29,13 @@ namespace VCAuthn.ACAPy
             _baseUrl = config.GetValue<string>("BaseUrl");
         }
         
-        public async Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationConfiguration presentationConfiguration)
+        public async Task<bool> CreatePresentationExchange(PresentationConfiguration.PresentationRecord presentationRecord)
         {
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri($"{_baseUrl}/presentation_exchange/create_request"),
-                Content = new StringContent(presentationConfiguration.ToJson(), Encoding.UTF8, MediaTypeNames.Application.Json)
+                Content = new StringContent(presentationRecord.ToJson(), Encoding.UTF8, MediaTypeNames.Application.Json)
             };
 
             try
