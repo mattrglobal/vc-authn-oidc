@@ -1,18 +1,12 @@
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
-using System.Security;
 using System.Threading.Tasks;
-using AutoMapper.Configuration;
 using IdentityModel;
 using IdentityServer4.Configuration;
-using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Hosting;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Session;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VCAuthn.ACAPy;
@@ -20,17 +14,16 @@ using VCAuthn.IdentityServer.SessionStorage;
 using VCAuthn.PresentationConfiguration;
 using VCAuthn.UrlShortener;
 using VCAuthn.Utils;
+using StatusCodeResult = IdentityServer4.Endpoints.Results.StatusCodeResult;
 
 namespace VCAuthn.IdentityServer.Endpoints
 {
     public class AuthorizeEndpoint : IEndpointHandler
     {
         public const string Name = "VCAuthorize";
-        public const string Path = "vc/connect/authorize";
         
         private readonly IClientSecretValidator _clientValidator;
         private readonly IPresentationConfigurationService _presentationConfigurationService;
-        private readonly IACAPYClient _acapyClient;
         private readonly IUrlShortenerService _urlShortenerService;
         private readonly ISessionStorageService _sessionStorage;
         private readonly IdentityServerOptions _options;
@@ -39,7 +32,6 @@ namespace VCAuthn.IdentityServer.Endpoints
         public AuthorizeEndpoint(
             IClientSecretValidator clientValidator,
             IPresentationConfigurationService presentationConfigurationService,
-            IACAPYClient acapyClient,
             IUrlShortenerService urlShortenerService,
             ISessionStorageService sessionStorage,
             IOptions<IdentityServerOptions> options,
@@ -48,7 +40,6 @@ namespace VCAuthn.IdentityServer.Endpoints
         {
             _clientValidator = clientValidator;
             _presentationConfigurationService = presentationConfigurationService;
-            _acapyClient = acapyClient;
             _urlShortenerService = urlShortenerService;
             _sessionStorage = sessionStorage;
             _options = options.Value;
@@ -118,17 +109,17 @@ namespace VCAuthn.IdentityServer.Endpoints
             var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin , presentationRequest.ToJson().ToBase64(), redirectUrl);
             var shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
             
-            // persist presentation id in a session
+            // persist presentation-request-id in a session
             var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id);
             
-            // set up session cookie
+            // set up a session cookie
             context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
             
-//            - return http page with QR code
-//                - set a `session-id` cookie
-//                - page long polls
-
-            return new AuthorizationEndpointResult(new AuthorizationRequest("CHALLENGE AWAITED"));
+            return new AuthorizationEndpointResult(
+                new AuthorizationRequest(
+                    shortUrl, 
+                    $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengePollUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}", 
+                    $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengeResolveUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}"));
         }
 
         private PresentationRequest BuildPresentationRequest(PresentationRecord record)
@@ -193,31 +184,6 @@ namespace VCAuthn.IdentityServer.Endpoints
                 public string error { get; set; }
                 public string error_description { get; set; }
             }
-        }
-    }
-
-    public class AuthorizationEndpointResult : IEndpointResult
-    {
-        private readonly AuthorizationRequest _authorizationRequest;
-
-        public AuthorizationEndpointResult(AuthorizationRequest authorizationRequest)
-        {
-            _authorizationRequest = authorizationRequest;
-        }
-
-        public async Task ExecuteAsync(HttpContext context)
-        {
-            await context.Response.WriteHtmlAsync("Doodsy do");
-        }
-    }
-
-    public class AuthorizationRequest
-    {
-        public string Channlenge { get; }
-
-        public AuthorizationRequest(string channlenge)
-        {
-            Channlenge = channlenge;
         }
     }
 }

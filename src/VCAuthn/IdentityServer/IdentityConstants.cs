@@ -10,7 +10,7 @@ namespace VCAuthn.IdentityServer
         public const string PresentationRequestConfigIDParamName = "pres_req_conf_id";
         public const string InvalidPresentationRequestConfigIDError = "invalid_pres_req_conf_id";
         public static string InvalidPresentationRequestConfigIDDesc = $"Missing {PresentationRequestConfigIDParamName} param";
-        
+
         public const string RedirectUriParameterName = "redirect_uri";
         public const string InvalidRedirectUriError = "invalid_redirect_uri";
         
@@ -22,5 +22,11 @@ namespace VCAuthn.IdentityServer
 
         public const string SessionIdCookieName = "sessionid";
 
+        public const string AuthorizationViewName = "/Views/Authorize/Authorize.cshtml";
+        
+        public const string ChallengeIdQueryParameterName = "pid";
+        public const string VerificationChallengePollUri = "vc/connect/poll";
+        public const string VerificationChallengeResolveUri = "vc/connect/resolve";
+        public const string VerifiedCredentialAuthorizeUri = "vc/connect/authorize";
     }
 }

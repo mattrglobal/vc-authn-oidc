@@ -6,7 +6,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
 {
     public class SessionStorageServiceOptions
     {
-        public int SessionLifetimeInMins { get; set; }
+        public int SessionLifetimeInSeconds { get; set; }
     }
 
     public class SessionStorageService : ISessionStorageService
@@ -26,7 +26,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
             {
                 Id = Guid.NewGuid().ToString(),
                 PresentationRequestId = presentationRequestId,
-                ExpiredTimestamp = DateTime.Now.AddMinutes(_options.SessionLifetimeInMins)
+                ExpiredTimestamp = DateTime.Now.AddSeconds(_options.SessionLifetimeInSeconds)
             };
             
             if (await AddSession(session))
