@@ -11,10 +11,12 @@ using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Hosting;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VCAuthn.ACAPy;
+using VCAuthn.IdentityServer.SessionStorage;
 using VCAuthn.PresentationConfiguration;
 using VCAuthn.UrlShortener;
 using VCAuthn.Utils;
@@ -30,6 +32,7 @@ namespace VCAuthn.IdentityServer.Endpoints
         private readonly IPresentationConfigurationService _presentationConfigurationService;
         private readonly IACAPYClient _acapyClient;
         private readonly IUrlShortenerService _urlShortenerService;
+        private readonly ISessionStorageService _sessionStorage;
         private readonly IdentityServerOptions _options;
         private readonly ILogger _logger;
 
@@ -38,6 +41,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             IPresentationConfigurationService presentationConfigurationService,
             IACAPYClient acapyClient,
             IUrlShortenerService urlShortenerService,
+            ISessionStorageService sessionStorage,
             IOptions<IdentityServerOptions> options,
             ILogger<AuthorizeEndpoint> logger
             )
@@ -46,6 +50,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             _presentationConfigurationService = presentationConfigurationService;
             _acapyClient = acapyClient;
             _urlShortenerService = urlShortenerService;
+            _sessionStorage = sessionStorage;
             _options = options.Value;
             _logger = logger;
         }
@@ -109,23 +114,21 @@ namespace VCAuthn.IdentityServer.Endpoints
 
             var presentationRequest = BuildPresentationRequest(presentationRecord);
             
+            // create a full and short url versions of a presentation requests
             var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin , presentationRequest.ToJson().ToBase64(), redirectUrl);
-            
             var shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
             
-//            - creates a new session-id (uuid), persists `(session-id, presentation-request-id, expired-timestamp)` in psql.
-//                `presentation-request-id` comes from `@id` field of the presentation request
-
+            // persist presentation id in a session
+            var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id);
+            
+            // set up session cookie
+            context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
+            
 //            - return http page with QR code
 //                - set a `session-id` cookie
 //                - page long polls
 
             return new AuthorizationEndpointResult(new AuthorizationRequest("CHALLENGE AWAITED"));
-        }
-
-        private string BuildUrl(string baseUrl, PresentationRequest presentationRequest)
-        {
-            
         }
 
         private PresentationRequest BuildPresentationRequest(PresentationRecord record)

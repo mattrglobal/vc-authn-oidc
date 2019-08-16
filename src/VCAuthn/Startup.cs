@@ -29,6 +29,8 @@ namespace VCAuthn
             services.AddAuthServer(Configuration.GetSection("IdentityServer"));
             
             services.AddUrlShortenerService(Configuration.GetSection("UrlShortenerService"));
+            services.AddSessionStorage(Configuration.GetSection("SessionStorageService"));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,6 +49,7 @@ namespace VCAuthn
             app.UseAuthServer(Configuration.GetSection("IdentityServer"));
 
             app.UseUrlShortenerService();
+            app.UseSessionStorage();
         }
     }
 }

@@ -20,5 +20,7 @@ namespace VCAuthn.IdentityServer
         public const string ResponseModeUriParameterName = "response_mode";
         public const string DefaultResponseMode = "verification_code";
 
+        public const string SessionIdCookieName = "sessionid";
+
     }
 }

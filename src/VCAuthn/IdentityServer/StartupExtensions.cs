@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VCAuthn.IdentityServer.Endpoints;
+using VCAuthn.IdentityServer.SessionStorage;
 using VCAuthn.PresentationConfiguration;
 using VCAuthn.UrlShortener;
 using VCAuthn.Utils;
@@ -125,6 +126,31 @@ namespace VCAuthn.IdentityServer
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<UrlShortenerServiceDbContext>();
+                context.Database.Migrate();
+            }
+        }
+        
+        
+        public static void AddSessionStorage(this IServiceCollection services, IConfiguration config)
+        {
+            // Fetch the migration assembly
+            var migrationsAssembly = typeof(StartupExtensions).GetTypeInfo().Assembly.GetName().Name;
+
+            // Register the DB context
+            services.AddDbContext<SessionStorageDbContext>(options =>
+                options.UseNpgsql(config.GetConnectionString("Database"), x => x.MigrationsAssembly(migrationsAssembly)));
+
+            // Adds the session storage service
+            services.AddTransient<ISessionStorageService, SessionStorageService>(
+                s => new SessionStorageService(s.GetService<SessionStorageDbContext>(), 
+                config.GetSection("SessionStorage").Get<SessionStorageServiceOptions>()));
+        }
+        
+        public static void UseSessionStorage(this IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<SessionStorageDbContext>();
                 context.Database.Migrate();
             }
         }
