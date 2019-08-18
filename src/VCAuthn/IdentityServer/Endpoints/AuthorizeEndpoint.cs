@@ -101,20 +101,43 @@ namespace VCAuthn.IdentityServer.Endpoints
                 responseMode = IdentityConstants.DefaultResponseMode;
             }
 
-            var presentationRecord = await _presentationConfigurationService.Find(presentationRecordId);
+            PresentationRecord presentationRecord;
+            try
+            {
+                presentationRecord = await _presentationConfigurationService.Find(presentationRecordId);
+            }
+            catch (Exception e)
+            {
+                return Error(IdentityConstants.UnknownPresentationRecordId, "Cannot find respective record id");
+            }
 
             var presentationRequest = BuildPresentationRequest(presentationRecord);
             
             // create a full and short url versions of a presentation requests
-            var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin , presentationRequest.ToJson().ToBase64(), redirectUrl);
-            var shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
-            
+            string shortUrl;
+            try
+            {
+                var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin, presentationRequest.ToJson().ToBase64(), redirectUrl);
+                shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
+            }
+            catch (Exception e)
+            {
+                return Error(IdentityConstants.PresentationUrlBuildFailed, "Presentation url build failed");
+            }
+
             // persist presentation-request-id in a session
-            var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id);
-            
-            // set up a session cookie
-            context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
-            
+            try
+            {
+                var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id);
+
+                // set up a session cookie
+                context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
+            }
+            catch (Exception e)
+            {
+                return Error(IdentityConstants.SessionStartFailed, "Failed to start a new session");
+            }
+
             return new AuthorizationEndpointResult(
                 new AuthorizationViewModel(
                     shortUrl, 

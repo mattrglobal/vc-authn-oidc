@@ -14,6 +14,10 @@ namespace VCAuthn.IdentityServer
         public const string RedirectUriParameterName = "redirect_uri";
         public const string InvalidRedirectUriError = "invalid_redirect_uri";
         
+        public const string UnknownPresentationRecordId = "unknown_presentation_record_id";
+        public const string PresentationUrlBuildFailed = "presentation_url_build_failed";
+        public const string SessionStartFailed = "session_start_failed";
+        
         public const string ResponseTypeUriParameterName = "response_type";
         public const string DefaultResponseType = "form_post";
         
