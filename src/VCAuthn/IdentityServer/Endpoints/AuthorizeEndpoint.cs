@@ -116,7 +116,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
             
             return new AuthorizationEndpointResult(
-                new AuthorizationRequest(
+                new AuthorizationViewModel(
                     shortUrl, 
                     $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengePollUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}", 
                     $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengeResolveUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}"));

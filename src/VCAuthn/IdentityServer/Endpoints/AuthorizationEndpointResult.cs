@@ -14,14 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace VCAuthn.IdentityServer.Endpoints
 {
-    public class AuthorizationRequest
+    public class AuthorizationViewModel
     {
         public string Challenge { get; }
         public string PollUrl { get; }
         public string ResolutionUrl { get; }
         public int Interval { get; }
 
-        public AuthorizationRequest(string challenge, string pollUrl, string resolutionUrl)
+        public AuthorizationViewModel(string challenge, string pollUrl, string resolutionUrl)
         {
             Challenge = challenge;
             PollUrl = pollUrl;
@@ -32,10 +32,10 @@ namespace VCAuthn.IdentityServer.Endpoints
 
     public class AuthorizationEndpointResult : IEndpointResult
     {
-        private readonly AuthorizationRequest _authorizationRequest;
+        private readonly AuthorizationViewModel _authorizationRequest;
         private readonly string _viewName = IdentityConstants.AuthorizationViewName;
 
-        public AuthorizationEndpointResult(AuthorizationRequest authorizationRequest)
+        public AuthorizationEndpointResult(AuthorizationViewModel authorizationRequest)
         {
             _authorizationRequest = authorizationRequest;
         }

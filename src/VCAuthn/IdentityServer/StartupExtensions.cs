@@ -57,6 +57,7 @@ namespace VCAuthn.IdentityServer
                 ;
             
             services.AddSingleton<IPresentationConfigurationService, PresentationConfigurationService>();
+            
         }
         
         public static void UseAuthServer(this IApplicationBuilder app, IConfiguration config)
@@ -140,10 +141,10 @@ namespace VCAuthn.IdentityServer
             services.AddDbContext<SessionStorageDbContext>(options =>
                 options.UseNpgsql(config.GetConnectionString("Database"), x => x.MigrationsAssembly(migrationsAssembly)));
 
+            services.Configure<SessionStorageServiceOptions>(config);
+            
             // Adds the session storage service
-            services.AddTransient<ISessionStorageService, SessionStorageService>(
-                s => new SessionStorageService(s.GetService<SessionStorageDbContext>(), 
-                config.GetSection("SessionStorage").Get<SessionStorageServiceOptions>()));
+            services.AddTransient<ISessionStorageService, SessionStorageService>();
         }
         
         public static void UseSessionStorage(this IApplicationBuilder app)

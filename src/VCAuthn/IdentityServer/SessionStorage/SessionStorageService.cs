@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VCAuthn.UrlShortener;
 
 namespace VCAuthn.IdentityServer.SessionStorage
@@ -14,10 +15,10 @@ namespace VCAuthn.IdentityServer.SessionStorage
         private readonly SessionStorageDbContext _context;
         private readonly SessionStorageServiceOptions _options;
 
-        public SessionStorageService(SessionStorageDbContext context, SessionStorageServiceOptions options)
+        public SessionStorageService(SessionStorageDbContext context, IOptions<SessionStorageServiceOptions> options)
         {
             _context = context;
-            _options = options;
+            _options = options.Value;
         }
 
         public async Task<string> CreateSessionAsync(string presentationRequestId)
