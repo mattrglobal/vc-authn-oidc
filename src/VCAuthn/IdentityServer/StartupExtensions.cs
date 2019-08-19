@@ -55,7 +55,7 @@ namespace VCAuthn.IdentityServer
                 // Custom Endpoints
                 .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, IdentityConstants.VerifiedCredentialAuthorizeUri.EnsureLeadingSlash());
             
-            services.AddSingleton<IPresentationConfigurationService, PresentationConfigurationService>();
+            services.AddScoped<IPresentationConfigurationService, PresentationConfigurationService>();
             
         }
         
