@@ -13,7 +13,8 @@ namespace VCAuthn.ACAPy
 {
     public interface IACAPYClient
     {
-        Task<WalletDidPublicResponse> WalletDidPublic();
+        Task<WalletPublicDid> WalletDidPublic();
+        string GetServicePublicUrl();
     }
 
     public class ACAPYClient : IACAPYClient
@@ -29,7 +30,12 @@ namespace VCAuthn.ACAPy
             _baseUrl = config.GetValue<string>("BaseUrl");
         }
 
-        public async Task<WalletDidPublicResponse> WalletDidPublic()
+        public string GetServicePublicUrl()
+        {
+            return _baseUrl;
+        }
+
+        public async Task<WalletPublicDid> WalletDidPublic()
         {
             var request = new HttpRequestMessage
             {
@@ -47,7 +53,7 @@ namespace VCAuthn.ACAPy
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.OK:
-                        return JsonConvert.DeserializeObject<WalletDidPublicResponse>(responseContent) ;
+                        return JsonConvert.DeserializeObject<WalletDidPublicResponse>(responseContent).Result ;
                     default:
                         throw new Exception($"Wallet Did public request error. Code: {response.StatusCode}");
                 }

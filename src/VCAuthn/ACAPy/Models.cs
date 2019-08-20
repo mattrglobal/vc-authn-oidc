@@ -6,18 +6,18 @@ namespace VCAuthn.ACAPy
 {
     public class WalletDidPublicResponse
     {
-        public class ResponseResult
-        {
-            [JsonProperty("did")]
-            public string DID { get; set; }
+        public WalletPublicDid Result { get; set; }
+    }
+    
+    public class WalletPublicDid
+    {
+        [JsonProperty("did")]
+        public string DID { get; set; }
             
-            [JsonProperty("verkey")]
-            public string Verkey { get; set; }
+        [JsonProperty("verkey")]
+        public string Verkey { get; set; }
             
-            [JsonProperty("public")]
-            public bool Public { get; set; }
-        }
-        
-        public ResponseResult Result { get; set; }
+        [JsonProperty("public")]
+        public bool Public { get; set; }
     }
 }

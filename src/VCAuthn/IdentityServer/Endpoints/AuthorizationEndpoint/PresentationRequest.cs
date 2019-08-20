@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace VCAuthn.IdentityServer.Endpoints
@@ -18,5 +19,20 @@ namespace VCAuthn.IdentityServer.Endpoints
         
         [JsonProperty("thread_id")]
         public string ThreadId { get; set; }
+        
+        [JsonProperty("~service")]
+        public ServiceDecorator Service { get; set; }
+    }
+
+    public class ServiceDecorator
+    {
+        [JsonProperty("recipientKeys")]
+        public List<string> RecipientKeys { get; set; }
+        
+        [JsonProperty("routingKeys")]
+        public List<string> RoutingKeys { get; set; }
+        
+        [JsonProperty("serviceEndpoint")]
+        public string ServiceEndpoint { get; set; }
     }
 }

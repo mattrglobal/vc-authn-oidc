@@ -9,6 +9,7 @@ using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using VCAuthn.ACAPy;
 using VCAuthn.IdentityServer.SessionStorage;
 using VCAuthn.PresentationConfiguration;
 using VCAuthn.UrlShortener;
@@ -25,6 +26,7 @@ namespace VCAuthn.IdentityServer.Endpoints
         private readonly IPresentationConfigurationService _presentationConfigurationService;
         private readonly IUrlShortenerService _urlShortenerService;
         private readonly ISessionStorageService _sessionStorage;
+        private readonly IACAPYClient _acapyClient;
         private readonly IdentityServerOptions _options;
         private readonly ILogger _logger;
 
@@ -33,6 +35,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             IPresentationConfigurationService presentationConfigurationService,
             IUrlShortenerService urlShortenerService,
             ISessionStorageService sessionStorage,
+            IACAPYClient acapyClient,
             IOptions<IdentityServerOptions> options,
             ILogger<AuthorizeEndpoint> logger
             )
@@ -41,6 +44,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             _presentationConfigurationService = presentationConfigurationService;
             _urlShortenerService = urlShortenerService;
             _sessionStorage = sessionStorage;
+            _acapyClient = acapyClient;
             _options = options.Value;
             _logger = logger;
         }
@@ -110,7 +114,17 @@ namespace VCAuthn.IdentityServer.Endpoints
                 return Error(IdentityConstants.UnknownPresentationRecordId, "Cannot find respective record id");
             }
 
-            var presentationRequest = BuildPresentationRequest(presentationRecord);
+            WalletPublicDid acapyPublicDid;
+            try
+            {
+                acapyPublicDid = await _acapyClient.WalletDidPublic();
+            }
+            catch (Exception e)
+            {
+                return Error(IdentityConstants.AcapyCallFailed, "Cannot fetch ACAPy wallet public did");
+            }
+
+            var presentationRequest = BuildPresentationRequest(presentationRecord, acapyPublicDid);
             
             // create a full and short url versions of a presentation requests
             string shortUrl;
@@ -144,7 +158,7 @@ namespace VCAuthn.IdentityServer.Endpoints
                     $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengeResolveUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}"));
         }
 
-        private PresentationRequest BuildPresentationRequest(PresentationRecord record)
+        private PresentationRequest BuildPresentationRequest(PresentationRecord record, WalletPublicDid acapyPublicDid)
         {
             record.Configuration.Nonce = $"0{Guid.NewGuid().ToString("N")}";
 
@@ -153,6 +167,11 @@ namespace VCAuthn.IdentityServer.Endpoints
                 Id = Guid.NewGuid().ToString(),
                 Request = record.Configuration,
                 ThreadId = Guid.NewGuid().ToString(),
+                Service = new ServiceDecorator
+                {
+                    RecipientKeys = {acapyPublicDid.Verkey},
+                    ServiceEndpoint = _acapyClient.GetServicePublicUrl()
+                }
             };
             return request;
         }
