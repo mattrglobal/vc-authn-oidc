@@ -116,7 +116,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             string shortUrl;
             try
             {
-                var url = string.Format("{0}?m={1}&r_uri={2}", _options.PublicOrigin, presentationRequest.ToJson().ToBase64(), redirectUrl);
+                var url = string.Format("{0}?m={1}", _options.PublicOrigin, presentationRequest.ToJson().ToBase64());
                 shortUrl = await _urlShortenerService.CreateShortUrlAsync(url);
             }
             catch (Exception e)
