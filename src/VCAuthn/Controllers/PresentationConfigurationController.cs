@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite.Internal;
 using VCAuthn.PresentationConfiguration;
 
 namespace VCAuthn.Controllers
@@ -35,7 +36,7 @@ namespace VCAuthn.Controllers
         public async Task<ActionResult> CreateConfig([FromBody] PresentationRecord record)
         {
             await _service.CreateAsync(record);
-            return Ok();
+            return Created(this.Url.Action("GetConfig", record.Id), record);
         }
         
         // PUT: api/vc-configs

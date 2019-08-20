@@ -85,7 +85,9 @@ namespace VCAuthn.PresentationConfiguration
             var record = _context.PresentationConfigurations.Find(id);
 
             if (record == null)
+            {
                 return false;
+            }
 
             _context.PresentationConfigurations.Remove(record);
             return _context.SaveChanges() == 1;
@@ -96,7 +98,9 @@ namespace VCAuthn.PresentationConfiguration
             var record = await _context.PresentationConfigurations.FindAsync(id);
 
             if (record == null)
+            {
                 return false;
+            }
 
             _context.PresentationConfigurations.Remove(record);
             return _context.SaveChanges() == 1;
