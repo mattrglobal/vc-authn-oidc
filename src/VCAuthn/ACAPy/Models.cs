@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace VCAuthn.ACAPy
+namespace VCAuthn.ACAPY
 {
     public class WalletDidPublicResponse
     {

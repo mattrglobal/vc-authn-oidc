@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using VCAuthn.ACAPy;
+using VCAuthn.ACAPY;
 using VCAuthn.IdentityServer;
 
 namespace VCAuthn

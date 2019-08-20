@@ -1,15 +1,12 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Net.Mime;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using VCAuthn.Utils;
 
-namespace VCAuthn.ACAPy
+namespace VCAuthn.ACAPY
 {
     public interface IACAPYClient
     {
@@ -22,6 +19,8 @@ namespace VCAuthn.ACAPy
         private readonly ILogger<ACAPYClient> _logger;
         private readonly string _baseUrl;
         private HttpClient _httpClient;
+        
+        public const string WalletDidPublicUri = "/wallet/did/public";
 
         public ACAPYClient(IConfiguration config, ILogger<ACAPYClient> logger)
         {
@@ -40,7 +39,7 @@ namespace VCAuthn.ACAPy
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_baseUrl}/wallet/did/public")
+                RequestUri = new Uri($"{_baseUrl}{WalletDidPublicUri}")
             };
 
             try
