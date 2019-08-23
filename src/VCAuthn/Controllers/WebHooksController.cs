@@ -6,17 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VCAuthn.ACAPY;
 using VCAuthn.IdentityServer.SessionStorage;
 
 namespace VCAuthn.Controllers
 {
     [Route("/topic")]
-    public class WebhooksController : ControllerBase
+    public class WebHooksController : ControllerBase
     {
         private readonly ISessionStorageService _sessionStorageService;
-        private readonly ILogger<WebhooksController> _logger;
+        private readonly ILogger<WebHooksController> _logger;
 
-        public WebhooksController(ISessionStorageService sessionStorageService, ILogger<WebhooksController> logger)
+        public WebHooksController(ISessionStorageService sessionStorageService, ILogger<WebHooksController> logger)
         {
             _sessionStorageService = sessionStorageService;
             _logger = logger;
@@ -26,7 +27,7 @@ namespace VCAuthn.Controllers
         [HttpPost("{topic}")]
         public async Task<ActionResult> GetTopicUpdate(string topic)
         {
-            if (String.Equals("presentations", topic, StringComparison.InvariantCultureIgnoreCase) == false)
+            if (String.Equals(ACAPYConstants.PresentationsTopic, topic, StringComparison.InvariantCultureIgnoreCase) == false)
             {
                 _logger.LogDebug($"Skipping webhook for topic [{topic}]");
                 return Ok();
@@ -39,15 +40,22 @@ namespace VCAuthn.Controllers
             }
             _logger.LogInformation($"Topic [{topic}], Payload [{payload}]");
 
-            var update = JsonConvert.DeserializeObject<PresentationUpdate>(payload);
-
-            if (update.State != "presentation_received")
+            try
             {
-                return Ok();
+                var update = JsonConvert.DeserializeObject<PresentationUpdate>(payload);
+
+                if (update.State != ACAPYConstants.SuccessfulPresentationUpdate)
+                {
+                    return Ok();
+                }
+
+                await _sessionStorageService.SatisfyPresentationRequestIdAsync(update.ThreadId);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to deserialize a payload");
             }
 
-            await _sessionStorageService.SatisfyPresentationRequestIdAsync(update.ThreadId);
-            
             return Ok();
         }
 
