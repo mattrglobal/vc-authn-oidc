@@ -30,7 +30,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
             {
                 Id = Guid.NewGuid().ToString(),
                 PresentationRequestId = presentationRequestId,
-                ExpiredTimestamp = DateTime.Now.AddSeconds(_options.SessionLifetimeInSeconds)
+                ExpiredTimestamp = DateTime.UtcNow.AddSeconds(_options.SessionLifetimeInSeconds)
             };
             
             if (await AddSession(session))

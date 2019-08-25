@@ -33,11 +33,17 @@ namespace VCAuthn.Controllers
                 _logger.LogDebug($"Cannot find a session corresponding to the presentation request. Presentation request Id: [{presentationRequestId}]");
                 return NotFound();
             }
-            
-            if (authSession.ExpiredTimestamp < DateTime.Now && authSession.PresentationRequestSatisfied)
-                return Ok();
 
-            return BadRequest();
+            if (authSession.PresentationRequestSatisfied == false)
+                return BadRequest();
+            
+            if (authSession.ExpiredTimestamp >= DateTime.UtcNow)
+            {
+                _logger.LogDebug($"Session expired. Session id: [{authSession.Id}]");
+                return BadRequest();
+            }
+
+            return Ok();
         }
     }
 }
