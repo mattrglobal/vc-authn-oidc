@@ -65,5 +65,10 @@ namespace VCAuthn.IdentityServer.SessionStorage
         {
             return await _context.Sessions.FirstOrDefaultAsync(x => x.PresentationRequestId == presentationRequestId);
         }
+
+        public async Task<AuthSession> FindBySessionIdAsync(string sessionId)
+        {
+            return await _context.Sessions.FirstOrDefaultAsync(x => x.Id == sessionId);
+        }
     }
 }
