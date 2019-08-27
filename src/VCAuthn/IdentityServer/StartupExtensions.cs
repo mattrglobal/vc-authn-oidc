@@ -53,7 +53,8 @@ namespace VCAuthn.IdentityServer
                 .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value)
                 
                 // Custom Endpoints
-                .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, IdentityConstants.VerifiedCredentialAuthorizeUri.EnsureLeadingSlash());
+                .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, IdentityConstants.VerifiedCredentialAuthorizeUri.EnsureLeadingSlash())
+                .AddEndpoint<TokenEndpoint>(TokenEndpoint.Name, IdentityConstants.VerifiedCredentialTokenUri.EnsureLeadingSlash());
             
             services.AddScoped<IPresentationConfigurationService, PresentationConfigurationService>();
             
