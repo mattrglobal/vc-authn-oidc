@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using VCAuthn.Controllers;
 
 namespace VCAuthn.IdentityServer.SessionStorage
 {
@@ -45,7 +46,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
             return await _context.SaveChangesAsync() == 1;
         }
         
-        public async Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId)
+        public async Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId, PartialPresentation partialPresentation)
         {
             var session = await _context.Sessions.FirstOrDefaultAsync(x => x.PresentationRequestId == presentationRequestId);
 
@@ -56,6 +57,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
             }
 
             session.PresentationRequestSatisfied = true;
+            session.Presentation = partialPresentation;
 
             _context.Sessions.Update(session);
             return await _context.SaveChangesAsync() == 1;

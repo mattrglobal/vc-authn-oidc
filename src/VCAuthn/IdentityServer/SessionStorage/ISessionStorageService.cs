@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using VCAuthn.Controllers;
 
 namespace VCAuthn.IdentityServer.SessionStorage
 {
@@ -6,7 +7,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
     {
         Task<string> CreateSessionAsync(string presentationRequestId);
         Task<bool> AddSession(AuthSession session);
-        Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId);
+        Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId, PartialPresentation partialPresentation);
         Task<AuthSession> FindByPresentationIdAsync(string presentationRequestId);
         Task<AuthSession> FindBySessionIdAsync(string sessionId);
     }
