@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using VCAuthn.IdentityServer;
