@@ -9,45 +9,42 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace VCAuthn.IdentityServer.Endpoints
 {
-   
+    /// <summary>
+    /// A token issuer service.
+    /// </summary>
+    public interface ITokenIssuerService
+    {
         /// <summary>
-        /// A token issuer service.
+        /// Issues a JWT.
         /// </summary>
-        public interface ITokenIssuerService
+        /// <exception cref="System.ArgumentNullException">claims</exception>
+        Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims);
+    }
+
+    public class TokenIssuerService : ITokenIssuerService
+    {
+        private readonly ITokenCreationService _tokenCreation;
+        private readonly ISystemClock _clock;
+
+        public TokenIssuerService(ITokenCreationService tokenCreation, ISystemClock clock)
         {
-            /// <summary>
-            /// Issues a JWT.
-            /// </summary>
-            /// <exception cref="System.ArgumentNullException">claims</exception>
-            Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims);
+            _tokenCreation = tokenCreation;
+            _clock = clock;
         }
-        
-        
-        public class TokenIssuerService : ITokenIssuerService
+
+        public async Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims)
         {
-            private readonly ITokenCreationService _tokenCreation;
-            private readonly ISystemClock _clock;
+            if (claims == null) throw new ArgumentNullException(nameof(claims));
 
-            public TokenIssuerService(ITokenCreationService tokenCreation, ISystemClock clock)
+            var token = new Token
             {
-                _tokenCreation = tokenCreation;
-                _clock = clock;
-            }
+                CreationTime = _clock.UtcNow.UtcDateTime,
+                Issuer = issuer,
+                Lifetime = lifetime,
+                Claims = new HashSet<Claim>(claims, new ClaimComparer())
+            };
 
-            public async Task<string> IssueJwtAsync(int lifetime, string issuer, IEnumerable<Claim> claims)
-            {
-                if (claims == null) throw new ArgumentNullException(nameof(claims));
-
-                var token = new Token
-                {
-                    CreationTime = _clock.UtcNow.UtcDateTime,
-                    Issuer = issuer,
-                    Lifetime = lifetime,
-                    Claims = new HashSet<Claim>(claims, new ClaimComparer())
-                };
-
-                return await _tokenCreation.CreateTokenAsync(token);
-            }
+            return await _tokenCreation.CreateTokenAsync(token);
         }
     }
 }
