@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VCAuthn.Controllers;
@@ -15,9 +16,10 @@ namespace VCAuthn.IdentityServer.SessionStorage
         public DateTime ExpiredTimestamp { get; set; }
         public bool PresentationRequestSatisfied { get; set; }
 
+        // exists to convince EntityFramework to store presentation as a string
         private string _presentation;
 
-
+        [NotMapped]
         public PartialPresentation Presentation
         {
             get => _presentation == null ? null : JsonConvert.DeserializeObject<PartialPresentation>(_presentation);
