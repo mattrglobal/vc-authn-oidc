@@ -145,7 +145,7 @@ namespace VCAuthn.IdentityServer.Endpoints
             // persist presentation-request-id in a session
             try
             {
-                var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id);
+                var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id, presentationRecordId);
 
                 // set up a session cookie
                 context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);

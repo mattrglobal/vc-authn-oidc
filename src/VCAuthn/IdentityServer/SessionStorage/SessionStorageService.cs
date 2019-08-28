@@ -25,12 +25,13 @@ namespace VCAuthn.IdentityServer.SessionStorage
             _options = options.Value;
         }
 
-        public async Task<string> CreateSessionAsync(string presentationRequestId)
+        public async Task<string> CreateSessionAsync(string presentationRequestId, string presentationRecordId)
         {
             var session = new AuthSession
             {
                 Id = Guid.NewGuid().ToString(),
                 PresentationRequestId = presentationRequestId,
+                PresentationRecordId = presentationRecordId,
                 ExpiredTimestamp = DateTime.UtcNow.AddSeconds(_options.SessionLifetimeInSeconds)
             };
             
@@ -71,6 +72,15 @@ namespace VCAuthn.IdentityServer.SessionStorage
         public async Task<AuthSession> FindBySessionIdAsync(string sessionId)
         {
             return await _context.Sessions.FirstOrDefaultAsync(x => x.Id == sessionId);
+        }
+
+        public bool DeleteSession(AuthSession session)
+        {
+            if (session == null)
+                return false;
+
+            _context.Sessions.Remove(session);
+            return _context.SaveChanges() == 1;
         }
     }
 }

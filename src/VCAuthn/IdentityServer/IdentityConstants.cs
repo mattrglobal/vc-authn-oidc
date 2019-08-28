@@ -32,6 +32,8 @@ namespace VCAuthn.IdentityServer
         public const string SessionIdCookieName = "sessionid";
         public const string MissingSessionCookieError = "mission_session_cookie";
         public const string InvalidSessionError = "invalid_session";
+        
+        public const string GeneralError = "error";
 
         public const string AuthorizationViewName = "/Views/Authorize/Authorize.cshtml";
         

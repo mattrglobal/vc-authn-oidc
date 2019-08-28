@@ -57,16 +57,16 @@ namespace VCAuthn.IdentityServer
                 .AddEndpoint<TokenEndpoint>(TokenEndpoint.Name, IdentityConstants.VerifiedCredentialTokenUri.EnsureLeadingSlash());
             
             services.AddScoped<IPresentationConfigurationService, PresentationConfigurationService>();
-            
+            services.AddScoped<ITokenIssuerService, TokenIssuerService>();
         }
         
         public static void UseAuthServer(this IApplicationBuilder app, IConfiguration config)
         {
-            InitializeDatabase(app, config.GetSection("RootClientSecret").Value);
+            InitializeDatabase(app);
             app.UseIdentityServer();
         }
         
-        public static void InitializeDatabase(IApplicationBuilder app, string rootClientSecret)
+        public static void InitializeDatabase(IApplicationBuilder app)
         {
             var _logger = app.ApplicationServices.GetService<ILogger<Startup>>();
             

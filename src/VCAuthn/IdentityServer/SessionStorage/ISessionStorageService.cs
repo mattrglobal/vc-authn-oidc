@@ -5,10 +5,11 @@ namespace VCAuthn.IdentityServer.SessionStorage
 {
     public interface ISessionStorageService
     {
-        Task<string> CreateSessionAsync(string presentationRequestId);
+        Task<string> CreateSessionAsync(string presentationRequestId, string presentationRecordId);
         Task<bool> AddSession(AuthSession session);
         Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId, PartialPresentation partialPresentation);
         Task<AuthSession> FindByPresentationIdAsync(string presentationRequestId);
         Task<AuthSession> FindBySessionIdAsync(string sessionId);
+        bool DeleteSession(AuthSession session);
     }
 }
