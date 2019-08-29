@@ -25,7 +25,6 @@ namespace VCAuthn.IdentityServer.Endpoints
         private readonly IClientSecretValidator _clientValidator;
         private readonly ISessionStorageService _sessionStore;
         private readonly ITokenIssuerService _tokenIssuerService;
-        private readonly IPresentationConfigurationService _presentationConfigurationService;
         private readonly ILogger _logger;
 
         public const string Name = "VCToken";
@@ -35,7 +34,6 @@ namespace VCAuthn.IdentityServer.Endpoints
             _clientValidator = clientValidator;
             _sessionStore = sessionStore;
             _tokenIssuerService = tokenIssuerService;
-            _presentationConfigurationService = presentationConfigurationService;
             _logger = logger;
         }
 
@@ -93,7 +91,7 @@ namespace VCAuthn.IdentityServer.Endpoints
 
             try
             {
-                return new TokenResult(session, _presentationConfigurationService, _tokenIssuerService, _sessionStore, _logger);
+                return new TokenResult(session, _tokenIssuerService, _sessionStore, _logger);
             }
             catch (Exception e)
             {
@@ -105,15 +103,13 @@ namespace VCAuthn.IdentityServer.Endpoints
         public class TokenResult : IEndpointResult
         {
             private readonly AuthSession _session;
-            private readonly IPresentationConfigurationService _presentationConfigurationService;
             private readonly ITokenIssuerService _tokenIssuerService;
             private readonly ISessionStorageService _sessionStorage;
             private readonly ILogger _logger;
 
-            public TokenResult(AuthSession session, IPresentationConfigurationService presentationConfigurationService, ITokenIssuerService tokenIssuerService, ISessionStorageService sessionStorage, ILogger logger)
+            public TokenResult(AuthSession session, ITokenIssuerService tokenIssuerService, ISessionStorageService sessionStorage, ILogger logger)
             {
                 _session = session;
-                _presentationConfigurationService = presentationConfigurationService;
                 _tokenIssuerService = tokenIssuerService;
                 _sessionStorage = sessionStorage;
                 _logger = logger;
@@ -121,33 +117,20 @@ namespace VCAuthn.IdentityServer.Endpoints
 
             public async Task ExecuteAsync(HttpContext context)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(IdentityConstants.PresentationRequestConfigIDParamName, _session.PresentationRecordId),
-                    new Claim("amr", IdentityConstants.VCAuthnScopeName)
-                };
-
-                var presentationConfig = await _presentationConfigurationService.GetAsync(_session.PresentationRecordId);
-
-                foreach (var attr in _session.Presentation.RequestedProof.RevealedAttributes)
-                {
-                    claims.Add(new Claim(attr.Key, attr.Value.Raw));
-                    if (string.Equals(attr.Key, presentationConfig.SubjectIdentifier, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        claims.Add(new Claim("sub", attr.Value.Raw));
-                    }
-                }
-
+                var presentation = _session.Presentation;
                 var issuer = context.GetIdentityServerIssuerUri();
-
-                var token = await _tokenIssuerService.IssueJwtAsync(10000, issuer, claims.ToArray());
+                var token = await _tokenIssuerService.IssueJwtAsync(10000, issuer, _session.PresentationRecordId, presentation);
 
                 if (_sessionStorage.DeleteSession(_session) == false)
                 {
                     _logger.LogError("Failed to delete a session");
                 }
 
-                await context.Response.WriteJsonAsync(new {verification_token = token});
+                await context.Response.WriteJsonAsync(new
+                {
+                    access_token = token,
+                    token_type = "Bearer"
+                });
             }
         }
     }
