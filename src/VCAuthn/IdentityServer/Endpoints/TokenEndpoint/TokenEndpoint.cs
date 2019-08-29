@@ -63,7 +63,7 @@ namespace VCAuthn.IdentityServer.Endpoints
                 return VCResponseHelpers.Error(OidcConstants.TokenErrors.InvalidClient);
             }
 
-            string grantType = values.Get(IdentityConstants.GrantTypeParameterName);
+            var grantType = values.Get(IdentityConstants.GrantTypeParameterName);
 
             if (string.IsNullOrEmpty(grantType))
             {
@@ -75,11 +75,10 @@ namespace VCAuthn.IdentityServer.Endpoints
                 return VCResponseHelpers.Error(IdentityConstants.InvalidGrantTypeError);
             }
 
-            string sessionId;
-            if (context.Request.Cookies.TryGetValue(IdentityConstants.SessionIdCookieName, out sessionId) == false)
-            {
-                return VCResponseHelpers.Error(IdentityConstants.MissingSessionCookieError, $"Missing ${IdentityConstants.SessionIdCookieName} cookie");
-            }
+            var sessionId = values.Get(IdentityConstants.VerificationCodeParameterName);
+
+            if (string.IsNullOrEmpty(sessionId))
+                return VCResponseHelpers.Error(IdentityConstants.InvalidVerificationCodeError);
 
             var session = await _sessionStore.FindBySessionIdAsync(sessionId);
             if (session == null)
