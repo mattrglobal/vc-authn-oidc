@@ -159,7 +159,7 @@ namespace VCAuthn.IdentityServer.Endpoints
                 new AuthorizationViewModel(
                     shortUrl, 
                     $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengePollUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}", 
-                    $"{_options.PublicOrigin}/{IdentityConstants.VerificationChallengeResolveUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}"));
+                    $"{_options.PublicOrigin}/{IdentityConstants.AuthorizeCallbackUri}?{IdentityConstants.ChallengeIdQueryParameterName}={presentationRequest.Id}"));
         }
 
         private PresentationRequest BuildPresentationRequest(PresentationRecord record, WalletPublicDid acapyPublicDid)

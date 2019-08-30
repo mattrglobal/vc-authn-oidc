@@ -10,11 +10,18 @@ namespace VCAuthn.IdentityServer.SessionStorage
     public class AuthSession
     {
         public string Id { get; set; }
-        public string PresentationRequestId { get; set; }
-        
-        public string PresentationRecordId { get; set; }
+
         public DateTime ExpiredTimestamp { get; set; }
+
+        // Requested presentation record id
+        public string PresentationRecordId { get; set; }
+        public string PresentationRequestId { get; set; }
         public bool PresentationRequestSatisfied { get; set; }
+        
+        // Requested OIDC response type
+        public string ResponseType { get; set; }
+        // Requested OIDC redirect url
+        public string RedirectUrl { get; set; }
 
         // exists to convince EntityFramework to store presentation as a string
         private string _presentation;
