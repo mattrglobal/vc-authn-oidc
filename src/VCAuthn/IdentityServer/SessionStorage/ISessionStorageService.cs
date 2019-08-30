@@ -5,7 +5,7 @@ namespace VCAuthn.IdentityServer.SessionStorage
 {
     public interface ISessionStorageService
     {
-        Task<string> CreateSessionAsync(string presentationRequestId, string presentationRecordId);
+        Task<AuthSession> CreateSessionAsync(AuthSession session);
         Task<bool> AddSession(AuthSession session);
         Task<bool> SatisfyPresentationRequestIdAsync(string presentationRequestId, PartialPresentation partialPresentation);
         Task<AuthSession> FindByPresentationIdAsync(string presentationRequestId);

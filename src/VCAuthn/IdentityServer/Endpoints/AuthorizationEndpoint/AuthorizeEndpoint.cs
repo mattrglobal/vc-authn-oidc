@@ -142,13 +142,18 @@ namespace VCAuthn.IdentityServer.Endpoints
                 return VCResponseHelpers.Error(IdentityConstants.PresentationUrlBuildFailed, "Presentation url build failed");
             }
 
-            // persist presentation-request-id in a session
+            // persist presentation request details in session
             try
             {
-                var sessionId = await _sessionStorage.CreateSessionAsync(presentationRequest.Id, presentationRecordId);
+                var session = await _sessionStorage.CreateSessionAsync(new AuthSession(){
+                    PresentationRequestId = presentationRequest.Id, 
+                    PresentationRecordId = presentationRecordId,
+                    ResponseType = responseType,
+                    RedirectUrl = redirectUrl
+                });
 
                 // set up a session cookie
-                context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, sessionId);
+                context.Response.Cookies.Append(IdentityConstants.SessionIdCookieName, session.Id);
             }
             catch (Exception e)
             {
