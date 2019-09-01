@@ -54,7 +54,8 @@ namespace VCAuthn.IdentityServer
                 
                 // Custom Endpoints
                 .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, IdentityConstants.VerifiedCredentialAuthorizeUri.EnsureLeadingSlash())
-                .AddEndpoint<TokenEndpoint>(TokenEndpoint.Name, IdentityConstants.VerifiedCredentialTokenUri.EnsureLeadingSlash());
+                .AddEndpoint<TokenEndpoint>(TokenEndpoint.Name, IdentityConstants.VerifiedCredentialTokenUri.EnsureLeadingSlash())
+                .AddEndpoint<TokenEndpoint>(AuthorizeCallback.Name, IdentityConstants.AuthorizeCallbackUri.EnsureLeadingSlash());
             
             services.AddScoped<IPresentationConfigurationService, PresentationConfigurationService>();
             services.AddScoped<ITokenIssuerService, TokenIssuerService>();
