@@ -47,7 +47,7 @@ namespace VCAuthn.IdentityServer
             
             if (id.Length > _options.InputLengthRestrictions.ClientId)
             {
-                _logger.LogError($"Client ID exceeds maximum length of { _options.InputLengthRestrictions.ClientId}");
+                _logger.LogError($"Client id exceeds maximum length of { _options.InputLengthRestrictions.ClientId}");
                 return null;
             }
 
