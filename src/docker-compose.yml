@@ -11,7 +11,7 @@ services:
     ports:
       - 5432:5432
   keycloak:
-    image: jboss/keycloak
+    image: jboss/keycloak:7.0.0
     ports:
       - 8180:8080
     volumes:

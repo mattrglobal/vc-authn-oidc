@@ -1,5 +1,7 @@
 ## Prepare
 ### Run docker-compose
+    `docker-compose -f docker-compose.yml up -d`
+
    It'll start:
    - Postgres db for the VCAuthn service
    - Keycloak with a pre-configured vc-authn realm

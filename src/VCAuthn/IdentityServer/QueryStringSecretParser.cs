@@ -25,13 +25,13 @@ namespace VCAuthn.IdentityServer
 
         public async Task<ParsedSecret> ParseAsync(HttpContext context)
         {
-            _logger.LogDebug("Start parsing for secret in request query");
+            _logger.LogDebug("Start parsing for secret in query string");
 
             var query = context.Request.Query;
 
             if (query == null)
             {
-                _logger.LogDebug("No secret in query found");
+                _logger.LogDebug("No secret in query string found");
                 return null;
             }
 
@@ -41,13 +41,13 @@ namespace VCAuthn.IdentityServer
             // client id must be present
             if (string.IsNullOrEmpty(id))
             {
-                _logger.LogDebug("No client in query found");
+                _logger.LogDebug("No client_id in query string found");
                 return null;
             }
             
             if (id.Length > _options.InputLengthRestrictions.ClientId)
             {
-                _logger.LogError("Client ID exceeds maximum length.");
+                _logger.LogError($"Client ID exceeds maximum length of { _options.InputLengthRestrictions.ClientId}");
                 return null;
             }
 
