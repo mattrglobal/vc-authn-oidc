@@ -107,12 +107,20 @@ namespace VCAuthn.IdentityServer
                 var clients = Config.GetClients(config.GetSection("Clients"));
                 foreach (var client in clients)
                 {
-                    if (currentClients.All(_ => _.ClientId != client.ClientId))
+                    var existingClient = currentClients.FirstOrDefault(_ => _.ClientId == client.ClientId);
+                    if (existingClient != null)
+                    {
+                        _logger.LogDebug($"Updating client [{client.ClientId}]");
+                        var c = client.ToEntity();
+                        c.Id = existingClient.Id;
+                        configContext.Entry(existingClient).CurrentValues.SetValues(c);
+                    }
+                    else
                     {
                         _logger.LogDebug($"Inserting client [{client.ClientId}]");
                         configContext.Clients.Add(client.ToEntity());    
-                        configContext.SaveChanges();
                     }
+                    configContext.SaveChanges();
                 }
                 configContext.SaveChanges();
             }
