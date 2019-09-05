@@ -52,9 +52,7 @@ namespace VCAuthn.IdentityServer
 
                 // If cert supplied will parse and call AddSigningCredential(), if not found will create a temp one
                 .AddDeveloperSigningCredential(true, config.GetSection("CertificateFilename").Value)
-                
-            
-                
+
                 // Custom Endpoints
                 .AddEndpoint<AuthorizeEndpoint>(AuthorizeEndpoint.Name, IdentityConstants.VerifiedCredentialAuthorizeUri.EnsureLeadingSlash())
                 .AddEndpoint<TokenEndpoint>(TokenEndpoint.Name, IdentityConstants.VerifiedCredentialTokenUri.EnsureLeadingSlash())
