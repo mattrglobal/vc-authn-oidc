@@ -8,6 +8,7 @@ using VCAuthn.UrlShortener;
 
 namespace VCAuthn.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class PresentationRequestController : ControllerBase
     {
         private readonly ISessionStorageService _sessionStorageService;
