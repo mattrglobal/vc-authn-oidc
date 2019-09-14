@@ -2,13 +2,13 @@
 
 namespace VCAuthn.Controllers
 {
-    [Route("/")]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class IndexController : Controller
     {
         public IndexController() : base() { }
 
         [HttpGet]
+        [Route("/")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult Index()
         {

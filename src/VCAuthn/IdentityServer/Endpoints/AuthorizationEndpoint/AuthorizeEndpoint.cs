@@ -183,7 +183,6 @@ namespace VCAuthn.IdentityServer.Endpoints
             {
                 Id = Guid.NewGuid().ToString(),
                 Request = record.Configuration,
-                ThreadId = Guid.NewGuid().ToString(),
                 Service = new ServiceDecorator
                 {
                     RecipientKeys = new List<string>{acapyPublicDid.Verkey},
